@@ -1,0 +1,34 @@
+from flask import Flask
+from flask import request
+from flask_mysqldb import MySQL
+mysql = MySQL()
+app = Flask(__name__)
+# My SQL Instance configurations 
+# Change the HOST IP and Password to match your instance configurations
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_DB'] = 'student'
+app.config['MYSQL_HOST'] = 'localhost' #for now
+mysql.init_app(app)
+
+@app.route("/delete") #delete Student
+def delete():
+    studentID = request.args.get('studentID')
+    cur = mysql.connection.cursor() #create a connection to the SQL instance
+    #Compose an INSERT statement: DELETE FROM students WHERE personID=$personID
+    s='''DELETE FROM students WHERE studentID = {};'''.format(studentID)
+    cur.execute(s)
+    mysql.connection.commit()
+    return s
+@app.route("/") #Default - Show Data
+def hello(): # Name of the method
+    cur = mysql.connection.cursor() #create a connection to the SQL instance
+    cur.execute('''SELECT * FROM students''') # execute an SQL statment
+    rv = cur.fetchall() #Retreive all rows returend by the SQL statment
+    ret = "Results: <BR/>" #Create return string
+    for row in rv: #Format the Output Results and delete to return string
+        ret=ret+'Name: '+row[0]+' Email: '+row[1]+' ID: '+str(row[2])+'<BR/> '
+
+    return ret      #Return the data in a string format
+if __name__ == "__main__":
+        app.run(host='0.0.0.0', port=8080) #Run the flask app at port 8080
